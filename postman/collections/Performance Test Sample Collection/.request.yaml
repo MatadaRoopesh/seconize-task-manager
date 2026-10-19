@@ -1,0 +1,5 @@
+$kind: http-request
+name: ""
+url: http://localhost:8080/api/tasks/priority/HIGH
+method: GET
+order: 1000

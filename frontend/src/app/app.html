@@ -1,0 +1,827 @@
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-logo">S</div>
+      <div class="brand-copy">
+        <h2>Seconize</h2>
+        <p>Task Manager</p>
+      </div>
+    </div>
+
+    <p class="sidebar-section-label">WORKSPACE</p>
+    <nav class="sidebar-nav">
+      <a class="nav-item active" href="#">▦ &nbsp; Dashboard</a>
+      <a class="nav-item" href="#task-overview">☷ &nbsp; All Tasks</a>
+      <a class="nav-item" href="#projects">▤ &nbsp; Projects</a>
+    </nav>
+
+    <div class="sidebar-profile">
+      <div class="profile-avatar">R</div>
+      <div><strong>Roopesh</strong><span>Workspace member</span></div>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">WORKSPACE OVERVIEW</p>
+        <h1>Dashboard</h1>
+        <p class="page-subtitle">Welcome back! Here's what's happening with your projects.</p>
+      </div>
+      <button type="button" class="primary-button" (click)="toggleCreateForm()">
+        + Create task
+      </button>
+    </header>
+
+    <!-- AI TASK GENERATOR -->
+    <section class="panel ai-panel">
+      <div class="panel-heading">
+        <div>
+          <p class="eyebrow">AI-POWERED PLANNING</p>
+          <h2>AI Task Generator</h2>
+          <p class="section-description">
+            Describe your project and let AI suggest tasks to help you get started.
+          </p>
+        </div>
+        <div class="ai-mark" aria-hidden="true">AI</div>
+      </div>
+
+      <form class="ai-form" (ngSubmit)="generateAiTasks()">
+        <div class="form-field">
+          <label for="ai-project-description">Project description *</label>
+          <textarea
+            id="ai-project-description"
+            name="aiProjectDescription"
+            [(ngModel)]="aiProjectDescription"
+            rows="4"
+            placeholder="Example: Build a task management application with user authentication, project creation, task tracking, comments, and a dashboard."
+            required></textarea>
+        </div>
+
+        <div class="ai-form-actions">
+          <p class="form-hint">
+            AI will suggest task titles, descriptions, and priorities.
+          </p>
+          <button type="submit" class="primary-button" [disabled]="aiLoading">
+            {{ aiLoading ? 'Generating tasks...' : '✨ Generate tasks' }}
+          </button>
+        </div>
+      </form>
+
+      @if (aiLoading) {
+      <div class="ai-loading" role="status">
+        <span class="ai-spinner"></span>
+        <span>AI is analyzing your project and generating task suggestions...</span>
+      </div>
+      }
+
+      @if (aiError) {
+      <div class="alert alert-error" role="alert">
+        {{ aiError }}
+        <button type="button" (click)="aiError = ''" aria-label="Dismiss error">×</button>
+      </div>
+      }
+
+      @if (aiMessage) {
+      <div class="alert alert-success" role="status">
+        {{ aiMessage }}
+        <button type="button" (click)="aiMessage = ''" aria-label="Dismiss message">×</button>
+      </div>
+      }
+
+      @if (aiSuggestions.length > 0) {
+      <div class="ai-results">
+        <div class="ai-results-heading">
+          <div>
+            <h3>Suggested tasks</h3>
+            <p>{{ aiSuggestions.length }} suggestions generated. Review them before using.</p>
+          </div>
+          <button type="button" class="secondary-button" (click)="clearAiSuggestions()">
+            Clear suggestions
+          </button>
+
+
+          <button
+            type="button"
+            class="btn-primary"
+            (click)="saveAiSuggestions()"
+            [disabled]="savingAiTasks || aiSuggestions.length === 0">
+            {{ savingAiTasks ? 'Saving tasks...' : 'Save AI Tasks' }}
+          </button>
+
+        </div>
+
+
+        <div class="ai-suggestions-list">
+          @for (suggestion of aiSuggestions; track $index) {
+          <article class="ai-suggestion-card">
+            <div class="ai-suggestion-main">
+              <div class="ai-suggestion-title-row">
+                <h4>{{ suggestion.title }}</h4>
+                <span
+                  class="priority-badge"
+                  [class.priority-low]="suggestion.priority === 'LOW'"
+                  [class.priority-medium]="suggestion.priority === 'MEDIUM'"
+                  [class.priority-high]="suggestion.priority === 'HIGH'"
+                  [class.priority-urgent]="suggestion.priority === 'URGENT'">
+                  {{ suggestion.priority }}
+                </span>
+              </div>
+              <p>{{ suggestion.description }}</p>
+            </div>
+
+            <button
+              type="button"
+              class="ai-remove-button"
+              (click)="removeAiSuggestion($index)"
+              [attr.aria-label]="'Remove suggestion ' + suggestion.title"
+              title="Remove suggestion">×</button>
+          </article>
+          }
+        </div>
+
+        <p class="form-hint ai-review-note">
+          These are suggestions only; they have not been saved as tasks yet.
+        </p>
+      </div>
+      }
+    </section>
+
+    @if (error) {
+    <div class="alert alert-error">
+      {{ error }}
+      <button type="button" (click)="loadDashboard()">Retry</button>
+    </div>
+    }
+
+    @if (taskMessage) {
+    <div class="alert alert-success">
+      {{ taskMessage }}
+      <button type="button" (click)="taskMessage = ''">×</button>
+    </div>
+    }
+
+    @if (taskError) {
+    <div class="alert alert-error">
+      {{ taskError }}
+      <button type="button" (click)="taskError = ''">×</button>
+    </div>
+    }
+
+    @if (showCreateForm) {
+    <section class="panel">
+      <div class="panel-heading">
+        <div>
+          <p class="eyebrow">NEW WORK ITEM</p>
+          <h2>Create a task</h2>
+        </div>
+        <button type="button" class="icon-button" (click)="closeCreateForm()">×</button>
+      </div>
+
+      <form class="task-form" (ngSubmit)="createTask()">
+        <div class="form-field">
+          <label for="new-title">Task title *</label>
+          <input
+            id="new-title"
+            name="title"
+            [(ngModel)]="newTask.title"
+            placeholder="Enter task title"
+            required />
+        </div>
+
+        <div class="form-field">
+          <label for="new-project">Project *</label>
+          <select id="new-project" name="projectId" [(ngModel)]="newTask.projectId" required>
+            <option [ngValue]="null" disabled>Select a project</option>
+            @for (project of projects; track project.id) {
+            <option [ngValue]="project.id">{{ project.name }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="form-field form-field-wide">
+          <label for="new-description">Description</label>
+          <textarea
+            id="new-description"
+            name="description"
+            [(ngModel)]="newTask.description"
+            rows="3"
+            placeholder="Describe the task"></textarea>
+        </div>
+
+        <div class="form-field">
+          <label for="new-assignee">Assignee</label>
+          <input
+            id="new-assignee"
+            name="assignee"
+            [(ngModel)]="newTask.assignee"
+            placeholder="Assignee name" />
+        </div>
+
+        <div class="form-field">
+          <label for="new-deadline">Deadline *</label>
+          <input
+            id="new-deadline"
+            name="deadline"
+            type="date"
+            [(ngModel)]="newTask.deadline"
+            required />
+        </div>
+
+        <div class="form-field">
+          <label for="new-priority">Priority</label>
+          <select id="new-priority" name="priority" [(ngModel)]="newTask.priority">
+            <option value="LOW">Low</option>
+            <option value="MEDIUM">Medium</option>
+            <option value="HIGH">High</option>
+            <option value="URGENT">Urgent</option>
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label for="new-status">Status</label>
+          <select id="new-status" name="status" [(ngModel)]="newTask.status">
+            <option value="TODO">To Do</option>
+            <option value="IN_PROGRESS">In Progress</option>
+            <option value="DONE">Done</option>
+          </select>
+        </div>
+
+        <div class="form-actions form-field-wide">
+          <button
+            type="button"
+            class="secondary-button"
+            (click)="closeCreateForm()"
+            [disabled]="savingTask">Cancel</button>
+          <button type="submit" class="primary-button" [disabled]="savingTask">
+            {{ savingTask ? 'Creating...' : 'Create task' }}
+          </button>
+        </div>
+      </form>
+    </section>
+    }
+
+    <section class="stats-grid">
+      <article class="stat-card">
+        <span class="stat-label">Projects</span>
+        <div class="stat-value">{{ projects.length }}</div>
+        <p>Projects in your workspace</p>
+      </article>
+      <article class="stat-card">
+        <span class="stat-label">Total tasks</span>
+        <div class="stat-value">{{ tasks.length }}</div>
+        <p>Tasks across all projects</p>
+      </article>
+      <article class="stat-card">
+        <span class="stat-label">To do</span>
+        <div class="stat-value">{{ todoCount }}</div>
+        <p>Waiting to be started</p>
+      </article>
+      <article class="stat-card">
+        <span class="stat-label">In progress</span>
+        <div class="stat-value">{{ inProgressCount }}</div>
+        <p>Currently being worked on</p>
+      </article>
+    </section>
+
+
+    <section class="panel kanban-panel" id="kanban-board">
+      <div class="panel-heading">
+        <div>
+          <p class="eyebrow">TASK WORKFLOW</p>
+          <h2>Kanban Board</h2>
+          <p class="section-description">
+            Track tasks and update their status across your workflow.
+          </p>
+        </div>
+        <span class="task-count">{{ tasks.length }} tasks</span>
+      </div>
+
+      <div class="kanban-board">
+        @for (column of kanbanColumns; track column.status) {
+        <section class="kanban-column">
+          <div class="kanban-column-header">
+            <h3>{{ column.label }}</h3>
+            <span class="kanban-count">
+            {{ tasksForStatus(column.status).length }}
+          </span>
+          </div>
+
+          <div class="kanban-column-list">
+            @for (task of tasksForStatus(column.status); track task.id) {
+            <article class="kanban-card">
+              <div class="kanban-card-top">
+                <span class="task-id">#{{ task.id }}</span>
+                <span
+                  class="priority-badge"
+                  [class.priority-low]="task.priority === 'LOW'"
+                  [class.priority-medium]="task.priority === 'MEDIUM'"
+                  [class.priority-high]="task.priority === 'HIGH'"
+                  [class.priority-urgent]="task.priority === 'URGENT'">
+                  {{ task.priority }}
+                </span>
+              </div>
+
+              <h4>{{ task.title }}</h4>
+
+              <p class="kanban-description">
+                {{ task.description || 'No description provided.' }}
+              </p>
+
+              <div class="kanban-card-details">
+                <span>Assigned: {{ task.assignee || 'Unassigned' }}</span>
+                <span>Deadline: {{ task.deadline || '—' }}</span>
+              </div>
+
+              <label [for]="'kanban-status-' + task.id">
+                Move task
+              </label>
+              <select
+                [id]="'kanban-status-' + task.id"
+                [ngModel]="task.status"
+                (ngModelChange)="moveTask(task, $event)"
+                [name]="'kanban-status-' + task.id">
+                <option value="TODO">To Do</option>
+                <option value="IN_PROGRESS">In Progress</option>
+                <option value="DONE">Done</option>
+              </select>
+            </article>
+            } @empty {
+            <div class="kanban-empty">
+              No tasks in this column.
+            </div>
+            }
+          </div>
+        </section>
+        }
+      </div>
+    </section>
+    <section class="panel task-panel" id="task-overview">
+    <div class="panel-heading">
+        <div>
+          <h2>Task overview</h2>
+          <p class="section-description">Manage tasks, subtasks and discussions.</p>
+        </div>
+        <span class="task-count">{{ filteredTasks.length }} tasks</span>
+      </div>
+
+      <div class="task-toolbar">
+        <input
+          class="search-input"
+          type="search"
+          name="search"
+          [(ngModel)]="search"
+          placeholder="Search tasks or assignees..." />
+
+        <select class="status-filter" name="selectedStatus" [(ngModel)]="selectedStatus">
+          <option value="ALL">All statuses</option>
+          <option value="TODO">To Do</option>
+          <option value="IN_PROGRESS">In Progress</option>
+          <option value="DONE">Done</option>
+        </select>
+      </div>
+
+      @if (loading) {
+      <div class="loading-state">Loading your tasks...</div>
+      } @else {
+      <div class="table-wrapper">
+        <table class="task-table">
+          <thead>
+          <tr>
+            <th>Task</th>
+            <th>Assignee</th>
+            <th>Priority</th>
+            <th>Status</th>
+            <th>Deadline</th>
+            <th>Actions</th>
+          </tr>
+          </thead>
+          <tbody>
+          @for (task of filteredTasks; track task.id) {
+          <tr class="task-row">
+            <td class="task-title-cell">
+              <strong>{{ task.title }}</strong>
+              <span class="task-description">
+                  {{ task.description || 'No description provided' }}
+                </span>
+              @if (isSubtask(task)) {
+              <span class="subtask-parent-label">
+                  Subtask · Parent #{{ parentIdOf(task) }}
+                </span>
+              }
+            </td>
+            <td>
+              <span class="assignee-cell">{{ task.assignee || 'Unassigned' }}</span>
+            </td>
+            <td>
+                <span
+                  class="priority-badge"
+                  [class.priority-low]="task.priority === 'LOW'"
+                  [class.priority-medium]="task.priority === 'MEDIUM'"
+                  [class.priority-high]="task.priority === 'HIGH'"
+                  [class.priority-urgent]="task.priority === 'URGENT'">
+                  {{ task.priority }}
+                </span>
+            </td>
+            <td>
+                <span
+                  class="status-badge"
+                  [class.status-todo]="task.status === 'TODO'"
+                  [class.status-progress]="task.status === 'IN_PROGRESS'"
+                  [class.status-done]="task.status === 'DONE'">
+                  {{ statusLabel(task.status) }}
+                </span>
+            </td>
+            <td>{{ task.deadline || '—' }}</td>
+            <td>
+              <div class="action-buttons">
+                @if (!isSubtask(task)) {
+                <button
+                  type="button"
+                  class="small-button subtask-btn"
+                  (click)="toggleSubtasks(task)">
+                  {{ expandedSubtaskParentId === task.id ? 'Hide subtasks' : 'Subtasks' }}
+                  ({{ subtasksByParent[task.id]?.length ?? '…' }})
+                </button>
+                }
+                <button
+                  type="button"
+                  class="small-button comments-btn"
+                  (click)="openComments(task)">Comments</button>
+                <button
+                  type="button"
+                  class="small-button edit-btn"
+                  (click)="startEdit(task)">Edit</button>
+                <button
+                  type="button"
+                  class="small-button delete-btn"
+                  [disabled]="deletingTaskId === task.id"
+                  (click)="deleteTask(task)">
+                  {{ deletingTaskId === task.id ? 'Deleting...' : 'Delete' }}
+                </button>
+              </div>
+            </td>
+          </tr>
+
+          @if (editingTaskId === task.id) {
+          <tr>
+            <td colspan="6">
+              <form class="edit-form" (ngSubmit)="saveEdit()">
+                <h3>Edit task</h3>
+                <div class="task-form">
+                  <div class="form-field">
+                    <label [for]="'edit-title-' + task.id">Title *</label>
+                    <input
+                      [id]="'edit-title-' + task.id"
+                      name="editTitle"
+                      [(ngModel)]="editTask.title"
+                      required />
+                  </div>
+                  <div class="form-field">
+                    <label [for]="'edit-assignee-' + task.id">Assignee</label>
+                    <input
+                      [id]="'edit-assignee-' + task.id"
+                      name="editAssignee"
+                      [(ngModel)]="editTask.assignee" />
+                  </div>
+                  <div class="form-field form-field-wide">
+                    <label [for]="'edit-description-' + task.id">Description</label>
+                    <textarea
+                      [id]="'edit-description-' + task.id"
+                      name="editDescription"
+                      [(ngModel)]="editTask.description"
+                      rows="2"></textarea>
+                  </div>
+                  <div class="form-field">
+                    <label [for]="'edit-deadline-' + task.id">Deadline</label>
+                    <input
+                      [id]="'edit-deadline-' + task.id"
+                      name="editDeadline"
+                      type="date"
+                      [(ngModel)]="editTask.deadline" />
+                  </div>
+                  <div class="form-field">
+                    <label [for]="'edit-priority-' + task.id">Priority</label>
+                    <select
+                      [id]="'edit-priority-' + task.id"
+                      name="editPriority"
+                      [(ngModel)]="editTask.priority">
+                      <option value="LOW">Low</option>
+                      <option value="MEDIUM">Medium</option>
+                      <option value="HIGH">High</option>
+                      <option value="URGENT">Urgent</option>
+                    </select>
+                  </div>
+                  <div class="form-field">
+                    <label [for]="'edit-status-' + task.id">Status</label>
+                    <select
+                      [id]="'edit-status-' + task.id"
+                      name="editStatus"
+                      [(ngModel)]="editTask.status">
+                      <option value="TODO">To Do</option>
+                      <option value="IN_PROGRESS">In Progress</option>
+                      <option value="DONE">Done</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-actions">
+                  <button type="button" class="secondary-button" (click)="cancelEdit()">
+                    Cancel
+                  </button>
+                  <button type="submit" class="primary-button" [disabled]="savingTask">
+                    {{ savingTask ? 'Saving...' : 'Save changes' }}
+                  </button>
+                </div>
+              </form>
+            </td>
+          </tr>
+          }
+
+          @if (expandedSubtaskParentId === task.id && !isSubtask(task)) {
+          <tr class="subtask-expanded-row">
+            <td colspan="6">
+              <section class="subtasks-panel" [id]="'subtasks-' + task.id">
+                <div class="panel-heading">
+                  <div>
+                    <p class="eyebrow">BREAK DOWN THE WORK</p>
+                    <h3>Subtasks for {{ task.title }}</h3>
+                    <p class="section-description">
+                      Create smaller work items and track each one independently.
+                    </p>
+                  </div>
+                  <span class="task-count">
+                      {{ subtasksByParent[task.id]?.length ?? 0 }} items
+                    </span>
+                </div>
+
+                @if (subtaskMessage) {
+                <div class="alert alert-success">{{ subtaskMessage }}</div>
+                }
+                @if (subtaskError) {
+                <div class="alert alert-error">{{ subtaskError }}</div>
+                }
+
+                @if (subtaskLoadingParentId === task.id) {
+                <div class="loading-state">Loading subtasks...</div>
+                } @else {
+                <div class="subtask-list">
+                  @for (subtask of (subtasksByParent[task.id] ?? []); track subtask.id) {
+                  <article class="subtask-item">
+                    <div class="subtask-item-copy">
+                      <strong>{{ subtask.title }}</strong>
+                      <span>{{ subtask.description || 'No description provided' }}</span>
+                      <small>
+                        #{{ subtask.id }} · {{ subtask.assignee || 'Unassigned' }}
+                        · Due {{ subtask.deadline || '—' }}
+                      </small>
+                    </div>
+                    <div class="subtask-item-controls">
+                        <span
+                          class="priority-badge"
+                          [class.priority-low]="subtask.priority === 'LOW'"
+                          [class.priority-medium]="subtask.priority === 'MEDIUM'"
+                          [class.priority-high]="subtask.priority === 'HIGH'"
+                          [class.priority-urgent]="subtask.priority === 'URGENT'">
+                          {{ subtask.priority }}
+                        </span>
+                      <select
+                        [ngModel]="subtask.status"
+                        (ngModelChange)="updateSubtaskStatus(subtask, $event, task)"
+                        [name]="'subtask-status-' + subtask.id"
+                        [attr.aria-label]="'Status for ' + subtask.title">
+                        <option value="TODO">To Do</option>
+                        <option value="IN_PROGRESS">In Progress</option>
+                        <option value="DONE">Done</option>
+                      </select>
+                      <button
+                        type="button"
+                        class="small-button comments-btn"
+                        (click)="openComments(subtask)">Comments</button>
+                    </div>
+                  </article>
+                  } @empty {
+                  <div class="subtasks-empty">
+                    No subtasks yet. Add the first one below.
+                  </div>
+                  }
+                </div>
+                }
+
+                <form class="subtask-create-form" (ngSubmit)="createSubtask(task)">
+                  <h3>Create a subtask</h3>
+                  <div class="task-form">
+                    <div class="form-field">
+                      <label [for]="'subtask-title-' + task.id">Title *</label>
+                      <input
+                        [id]="'subtask-title-' + task.id"
+                        [name]="'subtask-title-' + task.id"
+                        [(ngModel)]="subtaskForms[task.id].title"
+                        placeholder="e.g. Add validation"
+                        required />
+                    </div>
+                    <div class="form-field">
+                      <label [for]="'subtask-assignee-' + task.id">Assignee</label>
+                      <input
+                        [id]="'subtask-assignee-' + task.id"
+                        [name]="'subtask-assignee-' + task.id"
+                        [(ngModel)]="subtaskForms[task.id].assignee"
+                        placeholder="Team member" />
+                    </div>
+                    <div class="form-field form-field-wide">
+                      <label [for]="'subtask-description-' + task.id">Description</label>
+                      <textarea
+                        [id]="'subtask-description-' + task.id"
+                        [name]="'subtask-description-' + task.id"
+                        [(ngModel)]="subtaskForms[task.id].description"
+                        rows="2"
+                        placeholder="What needs to be done?"></textarea>
+                    </div>
+                    <div class="form-field">
+                      <label [for]="'subtask-deadline-' + task.id">Deadline *</label>
+                      <input
+                        [id]="'subtask-deadline-' + task.id"
+                        [name]="'subtask-deadline-' + task.id"
+                        type="date"
+                        [(ngModel)]="subtaskForms[task.id].deadline"
+                        required />
+                    </div>
+                    <div class="form-field">
+                      <label [for]="'subtask-priority-' + task.id">Priority</label>
+                      <select
+                        [id]="'subtask-priority-' + task.id"
+                        [name]="'subtask-priority-' + task.id"
+                        [(ngModel)]="subtaskForms[task.id].priority">
+                        <option value="LOW">Low</option>
+                        <option value="MEDIUM">Medium</option>
+                        <option value="HIGH">High</option>
+                        <option value="URGENT">Urgent</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="form-actions">
+                      <span class="form-hint">
+                        This subtask will be linked to its parent task.
+                      </span>
+                    <button
+                      type="submit"
+                      class="primary-button"
+                      [disabled]="subtaskSavingParentId === task.id">
+                      {{ subtaskSavingParentId === task.id ? 'Creating...' : '+ Create subtask' }}
+                    </button>
+                  </div>
+                </form>
+              </section>
+            </td>
+          </tr>
+          }
+          } @empty {
+          <tr>
+            <td colspan="6">
+              <div class="empty-state">
+                <h3>No tasks found</h3>
+                <p>
+                  @if (search || selectedStatus !== 'ALL') {
+                  Try changing your search or status filter.
+                  } @else {
+                  Create your first task to get started.
+                  }
+                </p>
+                <button type="button" class="primary-button" (click)="toggleCreateForm()">
+                  + Create task
+                </button>
+              </div>
+            </td>
+          </tr>
+          }
+          </tbody>
+        </table>
+      </div>
+      }
+    </section>
+
+    @if (selectedCommentTask) {
+    <section class="panel comments-panel" id="task-comments" aria-live="polite">
+      <div class="panel-heading">
+        <div>
+          <p class="eyebrow">TASK DISCUSSION</p>
+          <h2>Comments</h2>
+          <p class="section-description">
+            Discussion for <strong>{{ selectedCommentTask.title }}</strong>
+          </p>
+        </div>
+        <button
+          type="button"
+          class="icon-button"
+          (click)="closeComments()"
+          [disabled]="commentSaving"
+          aria-label="Close comments">×</button>
+      </div>
+
+      @if (commentMessage) {
+      <div class="alert alert-success">{{ commentMessage }}</div>
+      }
+      @if (commentError) {
+      <div class="alert alert-error">{{ commentError }}</div>
+      }
+
+      @if (commentLoading) {
+      <div class="loading-state">Loading comments...</div>
+      } @else {
+      <div class="comments-list">
+        @for (comment of comments; track comment.id) {
+        <article class="comment-item">
+          <div class="comment-avatar">
+            {{ (comment.author || 'U').charAt(0).toUpperCase() }}
+          </div>
+          <div class="comment-body">
+            <div class="comment-meta">
+              <strong>{{ comment.author || 'Unknown' }}</strong>
+              <time>{{ formatCommentDate(comment.createdAt) }}</time>
+            </div>
+            <p>{{ comment.content }}</p>
+          </div>
+        </article>
+        } @empty {
+        <div class="comments-empty">
+          <strong>No comments yet</strong>
+          <p>Start the discussion by adding the first comment.</p>
+        </div>
+        }
+      </div>
+      }
+
+      <form class="comment-form" (ngSubmit)="addComment()">
+        <label for="comment-content">Add a comment</label>
+        <textarea
+          id="comment-content"
+          name="commentContent"
+          [(ngModel)]="commentDraft"
+          rows="3"
+          maxlength="2000"
+          placeholder="Share an update or ask a question..."
+          required></textarea>
+        <div class="form-actions">
+          <span class="form-hint">
+            {{ commentDraft.length }}/2000 characters · Posting as Roopesh
+          </span>
+          <button
+            type="submit"
+            class="primary-button"
+            [disabled]="commentSaving || !commentDraft.trim()">
+            {{ commentSaving ? 'Posting...' : 'Post comment' }}
+          </button>
+        </div>
+      </form>
+    </section>
+    }
+
+    <section class="panel projects-panel" id="projects">
+      <div class="panel-heading">
+        <div>
+          <h2>Your projects</h2>
+          <p class="section-description">Projects retrieved from your backend.</p>
+        </div>
+        <span class="task-count">{{ projects.length }} projects</span>
+      </div>
+
+      @if (projects.length === 0) {
+      <div class="empty-state">
+        <p>No projects are available yet.</p>
+      </div>
+      } @else {
+      <div class="projects-grid">
+        @for (project of projects; track project.id) {
+        <article class="project-card">
+          <div class="project-card-top">
+            <div class="project-icon">P</div>
+            <span class="project-status">{{ project.status.replace('_', ' ') }}</span>
+          </div>
+          <h3>{{ project.name }}</h3>
+          <p>{{ project.description || 'No project description provided.' }}</p>
+          <div class="project-meta">
+            <div>
+              <span class="meta-label">Start date</span>
+              <strong>{{ project.startDate || '—' }}</strong>
+            </div>
+            <div>
+              <span class="meta-label">Deadline</span>
+              <strong>{{ project.deadline || '—' }}</strong>
+            </div>
+          </div>
+          <div class="project-card-footer">
+            <span class="project-member-avatar">R</span>
+            <span>Roopesh</span>
+            <span class="project-footer-label">Project member</span>
+          </div>
+        </article>
+        }
+      </div>
+      }
+    </section>
+
+    <footer class="page-footer">
+      <span>Seconize Task Manager</span>
+      <span>Workspace dashboard</span>
+    </footer>
+  </main>
+</div>
