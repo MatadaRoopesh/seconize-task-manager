@@ -17,7 +17,10 @@
 
     <div class="sidebar-profile">
       <div class="profile-avatar">R</div>
-      <div><strong>Roopesh</strong><span>Workspace member</span></div>
+      <div>
+        <strong>Roopesh</strong>
+        <span>Workspace member</span>
+      </div>
     </div>
   </aside>
 
@@ -26,9 +29,15 @@
       <div>
         <p class="eyebrow">WORKSPACE OVERVIEW</p>
         <h1>Dashboard</h1>
-        <p class="page-subtitle">Welcome back! Here's what's happening with your projects.</p>
+        <p class="page-subtitle">
+          Welcome back! Here's what's happening with your projects.
+        </p>
       </div>
-      <button type="button" class="primary-button" (click)="toggleCreateForm()">
+
+      <button
+        type="button"
+        class="primary-button"
+        (click)="toggleCreateForm()">
         + Create task
       </button>
     </header>
@@ -43,6 +52,7 @@
             Describe your project and let AI suggest tasks to help you get started.
           </p>
         </div>
+
         <div class="ai-mark" aria-hidden="true">AI</div>
       </div>
 
@@ -62,7 +72,11 @@
           <p class="form-hint">
             AI will suggest task titles, descriptions, and priorities.
           </p>
-          <button type="submit" class="primary-button" [disabled]="aiLoading">
+
+          <button
+            type="submit"
+            class="primary-button"
+            [disabled]="aiLoading">
             {{ aiLoading ? 'Generating tasks...' : '✨ Generate tasks' }}
           </button>
         </div>
@@ -71,21 +85,29 @@
       @if (aiLoading) {
       <div class="ai-loading" role="status">
         <span class="ai-spinner"></span>
-        <span>AI is analyzing your project and generating task suggestions...</span>
+        <span>
+            AI is analyzing your project and generating task suggestions...
+          </span>
       </div>
       }
 
       @if (aiError) {
       <div class="alert alert-error" role="alert">
         {{ aiError }}
-        <button type="button" (click)="aiError = ''" aria-label="Dismiss error">×</button>
+        <button
+          type="button"
+          (click)="aiError = ''"
+          aria-label="Dismiss error">×</button>
       </div>
       }
 
       @if (aiMessage) {
       <div class="alert alert-success" role="status">
         {{ aiMessage }}
-        <button type="button" (click)="aiMessage = ''" aria-label="Dismiss message">×</button>
+        <button
+          type="button"
+          (click)="aiMessage = ''"
+          aria-label="Dismiss message">×</button>
       </div>
       }
 
@@ -94,23 +116,29 @@
         <div class="ai-results-heading">
           <div>
             <h3>Suggested tasks</h3>
-            <p>{{ aiSuggestions.length }} suggestions generated. Review them before using.</p>
+            <p>
+              {{ aiSuggestions.length }} suggestions generated.
+              Review them before using.
+            </p>
           </div>
-          <button type="button" class="secondary-button" (click)="clearAiSuggestions()">
-            Clear suggestions
-          </button>
 
+          <div class="ai-form-actions">
+            <button
+              type="button"
+              class="secondary-button"
+              (click)="clearAiSuggestions()">
+              Clear suggestions
+            </button>
 
-          <button
-            type="button"
-            class="btn-primary"
-            (click)="saveAiSuggestions()"
-            [disabled]="savingAiTasks || aiSuggestions.length === 0">
-            {{ savingAiTasks ? 'Saving tasks...' : 'Save AI Tasks' }}
-          </button>
-
+            <button
+              type="button"
+              class="primary-button"
+              (click)="saveAiSuggestions()"
+              [disabled]="savingAiTasks || aiSuggestions.length === 0">
+              {{ savingAiTasks ? 'Saving tasks...' : 'Save AI Tasks' }}
+            </button>
+          </div>
         </div>
-
 
         <div class="ai-suggestions-list">
           @for (suggestion of aiSuggestions; track $index) {
@@ -118,15 +146,17 @@
             <div class="ai-suggestion-main">
               <div class="ai-suggestion-title-row">
                 <h4>{{ suggestion.title }}</h4>
+
                 <span
                   class="priority-badge"
                   [class.priority-low]="suggestion.priority === 'LOW'"
                   [class.priority-medium]="suggestion.priority === 'MEDIUM'"
                   [class.priority-high]="suggestion.priority === 'HIGH'"
                   [class.priority-urgent]="suggestion.priority === 'URGENT'">
-                  {{ suggestion.priority }}
-                </span>
+                      {{ suggestion.priority }}
+                    </span>
               </div>
+
               <p>{{ suggestion.description }}</p>
             </div>
 
@@ -147,6 +177,7 @@
       }
     </section>
 
+    <!-- GENERAL ERROR AND SUCCESS MESSAGES -->
     @if (error) {
     <div class="alert alert-error">
       {{ error }}
@@ -168,6 +199,7 @@
     </div>
     }
 
+    <!-- CREATE TASK FORM -->
     @if (showCreateForm) {
     <section class="panel">
       <div class="panel-heading">
@@ -175,7 +207,11 @@
           <p class="eyebrow">NEW WORK ITEM</p>
           <h2>Create a task</h2>
         </div>
-        <button type="button" class="icon-button" (click)="closeCreateForm()">×</button>
+
+        <button
+          type="button"
+          class="icon-button"
+          (click)="closeCreateForm()">×</button>
       </div>
 
       <form class="task-form" (ngSubmit)="createTask()">
@@ -191,8 +227,13 @@
 
         <div class="form-field">
           <label for="new-project">Project *</label>
-          <select id="new-project" name="projectId" [(ngModel)]="newTask.projectId" required>
+          <select
+            id="new-project"
+            name="projectId"
+            [(ngModel)]="newTask.projectId"
+            required>
             <option [ngValue]="null" disabled>Select a project</option>
+
             @for (project of projects; track project.id) {
             <option [ngValue]="project.id">{{ project.name }}</option>
             }
@@ -230,7 +271,10 @@
 
         <div class="form-field">
           <label for="new-priority">Priority</label>
-          <select id="new-priority" name="priority" [(ngModel)]="newTask.priority">
+          <select
+            id="new-priority"
+            name="priority"
+            [(ngModel)]="newTask.priority">
             <option value="LOW">Low</option>
             <option value="MEDIUM">Medium</option>
             <option value="HIGH">High</option>
@@ -240,7 +284,10 @@
 
         <div class="form-field">
           <label for="new-status">Status</label>
-          <select id="new-status" name="status" [(ngModel)]="newTask.status">
+          <select
+            id="new-status"
+            name="status"
+            [(ngModel)]="newTask.status">
             <option value="TODO">To Do</option>
             <option value="IN_PROGRESS">In Progress</option>
             <option value="DONE">Done</option>
@@ -253,7 +300,11 @@
             class="secondary-button"
             (click)="closeCreateForm()"
             [disabled]="savingTask">Cancel</button>
-          <button type="submit" class="primary-button" [disabled]="savingTask">
+
+          <button
+            type="submit"
+            class="primary-button"
+            [disabled]="savingTask">
             {{ savingTask ? 'Creating...' : 'Create task' }}
           </button>
         </div>
@@ -261,22 +312,26 @@
     </section>
     }
 
+    <!-- DASHBOARD STATISTICS -->
     <section class="stats-grid">
       <article class="stat-card">
         <span class="stat-label">Projects</span>
         <div class="stat-value">{{ projects.length }}</div>
         <p>Projects in your workspace</p>
       </article>
+
       <article class="stat-card">
         <span class="stat-label">Total tasks</span>
         <div class="stat-value">{{ tasks.length }}</div>
         <p>Tasks across all projects</p>
       </article>
+
       <article class="stat-card">
         <span class="stat-label">To do</span>
         <div class="stat-value">{{ todoCount }}</div>
         <p>Waiting to be started</p>
       </article>
+
       <article class="stat-card">
         <span class="stat-label">In progress</span>
         <div class="stat-value">{{ inProgressCount }}</div>
@@ -284,7 +339,7 @@
       </article>
     </section>
 
-
+    <!-- KANBAN BOARD -->
     <section class="panel kanban-panel" id="kanban-board">
       <div class="panel-heading">
         <div>
@@ -294,6 +349,7 @@
             Track tasks and update their status across your workflow.
           </p>
         </div>
+
         <span class="task-count">{{ tasks.length }} tasks</span>
       </div>
 
@@ -303,8 +359,8 @@
           <div class="kanban-column-header">
             <h3>{{ column.label }}</h3>
             <span class="kanban-count">
-            {{ tasksForStatus(column.status).length }}
-          </span>
+                {{ tasksForStatus(column.status).length }}
+              </span>
           </div>
 
           <div class="kanban-column-list">
@@ -312,14 +368,15 @@
             <article class="kanban-card">
               <div class="kanban-card-top">
                 <span class="task-id">#{{ task.id }}</span>
+
                 <span
                   class="priority-badge"
                   [class.priority-low]="task.priority === 'LOW'"
                   [class.priority-medium]="task.priority === 'MEDIUM'"
                   [class.priority-high]="task.priority === 'HIGH'"
                   [class.priority-urgent]="task.priority === 'URGENT'">
-                  {{ task.priority }}
-                </span>
+                      {{ task.priority }}
+                    </span>
               </div>
 
               <h4>{{ task.title }}</h4>
@@ -333,9 +390,8 @@
                 <span>Deadline: {{ task.deadline || '—' }}</span>
               </div>
 
-              <label [for]="'kanban-status-' + task.id">
-                Move task
-              </label>
+              <label [for]="'kanban-status-' + task.id">Move task</label>
+
               <select
                 [id]="'kanban-status-' + task.id"
                 [ngModel]="task.status"
@@ -356,12 +412,17 @@
         }
       </div>
     </section>
+
+    <!-- TASK OVERVIEW -->
     <section class="panel task-panel" id="task-overview">
-    <div class="panel-heading">
+      <div class="panel-heading">
         <div>
           <h2>Task overview</h2>
-          <p class="section-description">Manage tasks, subtasks and discussions.</p>
+          <p class="section-description">
+            Manage tasks, subtasks and discussions.
+          </p>
         </div>
+
         <span class="task-count">{{ filteredTasks.length }} tasks</span>
       </div>
 
@@ -373,7 +434,10 @@
           [(ngModel)]="search"
           placeholder="Search tasks or assignees..." />
 
-        <select class="status-filter" name="selectedStatus" [(ngModel)]="selectedStatus">
+        <select
+          class="status-filter"
+          name="selectedStatus"
+          [(ngModel)]="selectedStatus">
           <option value="ALL">All statuses</option>
           <option value="TODO">To Do</option>
           <option value="IN_PROGRESS">In Progress</option>
@@ -396,43 +460,53 @@
             <th>Actions</th>
           </tr>
           </thead>
+
           <tbody>
           @for (task of filteredTasks; track task.id) {
           <tr class="task-row">
             <td class="task-title-cell">
               <strong>{{ task.title }}</strong>
+
               <span class="task-description">
-                  {{ task.description || 'No description provided' }}
-                </span>
+                      {{ task.description || 'No description provided' }}
+                    </span>
+
               @if (isSubtask(task)) {
               <span class="subtask-parent-label">
-                  Subtask · Parent #{{ parentIdOf(task) }}
-                </span>
+                        Subtask · Parent #{{ parentIdOf(task) }}
+                      </span>
               }
             </td>
+
             <td>
-              <span class="assignee-cell">{{ task.assignee || 'Unassigned' }}</span>
+                    <span class="assignee-cell">
+                      {{ task.assignee || 'Unassigned' }}
+                    </span>
             </td>
+
             <td>
-                <span
-                  class="priority-badge"
-                  [class.priority-low]="task.priority === 'LOW'"
-                  [class.priority-medium]="task.priority === 'MEDIUM'"
-                  [class.priority-high]="task.priority === 'HIGH'"
-                  [class.priority-urgent]="task.priority === 'URGENT'">
-                  {{ task.priority }}
-                </span>
+                    <span
+                      class="priority-badge"
+                      [class.priority-low]="task.priority === 'LOW'"
+                      [class.priority-medium]="task.priority === 'MEDIUM'"
+                      [class.priority-high]="task.priority === 'HIGH'"
+                      [class.priority-urgent]="task.priority === 'URGENT'">
+                      {{ task.priority }}
+                    </span>
             </td>
+
             <td>
-                <span
-                  class="status-badge"
-                  [class.status-todo]="task.status === 'TODO'"
-                  [class.status-progress]="task.status === 'IN_PROGRESS'"
-                  [class.status-done]="task.status === 'DONE'">
-                  {{ statusLabel(task.status) }}
-                </span>
+                    <span
+                      class="status-badge"
+                      [class.status-todo]="task.status === 'TODO'"
+                      [class.status-progress]="task.status === 'IN_PROGRESS'"
+                      [class.status-done]="task.status === 'DONE'">
+                      {{ statusLabel(task.status) }}
+                    </span>
             </td>
+
             <td>{{ task.deadline || '—' }}</td>
+
             <td>
               <div class="action-buttons">
                 @if (!isSubtask(task)) {
@@ -444,14 +518,17 @@
                   ({{ subtasksByParent[task.id]?.length ?? '…' }})
                 </button>
                 }
+
                 <button
                   type="button"
                   class="small-button comments-btn"
                   (click)="openComments(task)">Comments</button>
+
                 <button
                   type="button"
                   class="small-button edit-btn"
                   (click)="startEdit(task)">Edit</button>
+
                 <button
                   type="button"
                   class="small-button delete-btn"
@@ -463,11 +540,13 @@
             </td>
           </tr>
 
+          <!-- EDIT TASK -->
           @if (editingTaskId === task.id) {
           <tr>
             <td colspan="6">
               <form class="edit-form" (ngSubmit)="saveEdit()">
                 <h3>Edit task</h3>
+
                 <div class="task-form">
                   <div class="form-field">
                     <label [for]="'edit-title-' + task.id">Title *</label>
@@ -477,6 +556,7 @@
                       [(ngModel)]="editTask.title"
                       required />
                   </div>
+
                   <div class="form-field">
                     <label [for]="'edit-assignee-' + task.id">Assignee</label>
                     <input
@@ -484,6 +564,7 @@
                       name="editAssignee"
                       [(ngModel)]="editTask.assignee" />
                   </div>
+
                   <div class="form-field form-field-wide">
                     <label [for]="'edit-description-' + task.id">Description</label>
                     <textarea
@@ -492,6 +573,7 @@
                       [(ngModel)]="editTask.description"
                       rows="2"></textarea>
                   </div>
+
                   <div class="form-field">
                     <label [for]="'edit-deadline-' + task.id">Deadline</label>
                     <input
@@ -500,6 +582,7 @@
                       type="date"
                       [(ngModel)]="editTask.deadline" />
                   </div>
+
                   <div class="form-field">
                     <label [for]="'edit-priority-' + task.id">Priority</label>
                     <select
@@ -512,6 +595,7 @@
                       <option value="URGENT">Urgent</option>
                     </select>
                   </div>
+
                   <div class="form-field">
                     <label [for]="'edit-status-' + task.id">Status</label>
                     <select
@@ -524,11 +608,19 @@
                     </select>
                   </div>
                 </div>
+
                 <div class="form-actions">
-                  <button type="button" class="secondary-button" (click)="cancelEdit()">
+                  <button
+                    type="button"
+                    class="secondary-button"
+                    (click)="cancelEdit()">
                     Cancel
                   </button>
-                  <button type="submit" class="primary-button" [disabled]="savingTask">
+
+                  <button
+                    type="submit"
+                    class="primary-button"
+                    [disabled]="savingTask">
                     {{ savingTask ? 'Saving...' : 'Save changes' }}
                   </button>
                 </div>
@@ -537,10 +629,14 @@
           </tr>
           }
 
+          <!-- SUBTASKS -->
           @if (expandedSubtaskParentId === task.id && !isSubtask(task)) {
           <tr class="subtask-expanded-row">
             <td colspan="6">
-              <section class="subtasks-panel" [id]="'subtasks-' + task.id">
+              <section
+                class="subtasks-panel"
+                [id]="'subtasks-' + task.id">
+
                 <div class="panel-heading">
                   <div>
                     <p class="eyebrow">BREAK DOWN THE WORK</p>
@@ -549,14 +645,16 @@
                       Create smaller work items and track each one independently.
                     </p>
                   </div>
+
                   <span class="task-count">
-                      {{ subtasksByParent[task.id]?.length ?? 0 }} items
-                    </span>
+                            {{ subtasksByParent[task.id]?.length ?? 0 }} items
+                          </span>
                 </div>
 
                 @if (subtaskMessage) {
                 <div class="alert alert-success">{{ subtaskMessage }}</div>
                 }
+
                 @if (subtaskError) {
                 <div class="alert alert-error">{{ subtaskError }}</div>
                 }
@@ -565,25 +663,32 @@
                 <div class="loading-state">Loading subtasks...</div>
                 } @else {
                 <div class="subtask-list">
-                  @for (subtask of (subtasksByParent[task.id] ?? []); track subtask.id) {
+                  @for (
+                  subtask of (subtasksByParent[task.id] ?? []);
+                  track subtask.id
+                  ) {
                   <article class="subtask-item">
                     <div class="subtask-item-copy">
                       <strong>{{ subtask.title }}</strong>
-                      <span>{{ subtask.description || 'No description provided' }}</span>
+                      <span>
+                                    {{ subtask.description || 'No description provided' }}
+                                  </span>
                       <small>
                         #{{ subtask.id }} · {{ subtask.assignee || 'Unassigned' }}
                         · Due {{ subtask.deadline || '—' }}
                       </small>
                     </div>
+
                     <div class="subtask-item-controls">
-                        <span
-                          class="priority-badge"
-                          [class.priority-low]="subtask.priority === 'LOW'"
-                          [class.priority-medium]="subtask.priority === 'MEDIUM'"
-                          [class.priority-high]="subtask.priority === 'HIGH'"
-                          [class.priority-urgent]="subtask.priority === 'URGENT'">
-                          {{ subtask.priority }}
-                        </span>
+                                  <span
+                                    class="priority-badge"
+                                    [class.priority-low]="subtask.priority === 'LOW'"
+                                    [class.priority-medium]="subtask.priority === 'MEDIUM'"
+                                    [class.priority-high]="subtask.priority === 'HIGH'"
+                                    [class.priority-urgent]="subtask.priority === 'URGENT'">
+                                    {{ subtask.priority }}
+                                  </span>
+
                       <select
                         [ngModel]="subtask.status"
                         (ngModelChange)="updateSubtaskStatus(subtask, $event, task)"
@@ -593,6 +698,7 @@
                         <option value="IN_PROGRESS">In Progress</option>
                         <option value="DONE">Done</option>
                       </select>
+
                       <button
                         type="button"
                         class="small-button comments-btn"
@@ -607,8 +713,13 @@
                 </div>
                 }
 
-                <form class="subtask-create-form" (ngSubmit)="createSubtask(task)">
+                <!-- CREATE SUBTASK FORM -->
+                <form
+                  class="subtask-create-form"
+                  (ngSubmit)="createSubtask(task)">
+
                   <h3>Create a subtask</h3>
+
                   <div class="task-form">
                     <div class="form-field">
                       <label [for]="'subtask-title-' + task.id">Title *</label>
@@ -619,6 +730,7 @@
                         placeholder="e.g. Add validation"
                         required />
                     </div>
+
                     <div class="form-field">
                       <label [for]="'subtask-assignee-' + task.id">Assignee</label>
                       <input
@@ -627,6 +739,7 @@
                         [(ngModel)]="subtaskForms[task.id].assignee"
                         placeholder="Team member" />
                     </div>
+
                     <div class="form-field form-field-wide">
                       <label [for]="'subtask-description-' + task.id">Description</label>
                       <textarea
@@ -636,6 +749,7 @@
                         rows="2"
                         placeholder="What needs to be done?"></textarea>
                     </div>
+
                     <div class="form-field">
                       <label [for]="'subtask-deadline-' + task.id">Deadline *</label>
                       <input
@@ -645,6 +759,7 @@
                         [(ngModel)]="subtaskForms[task.id].deadline"
                         required />
                     </div>
+
                     <div class="form-field">
                       <label [for]="'subtask-priority-' + task.id">Priority</label>
                       <select
@@ -658,15 +773,21 @@
                       </select>
                     </div>
                   </div>
+
                   <div class="form-actions">
-                      <span class="form-hint">
-                        This subtask will be linked to its parent task.
-                      </span>
+                            <span class="form-hint">
+                              This subtask will be linked to its parent task.
+                            </span>
+
                     <button
                       type="submit"
                       class="primary-button"
                       [disabled]="subtaskSavingParentId === task.id">
-                      {{ subtaskSavingParentId === task.id ? 'Creating...' : '+ Create subtask' }}
+                      {{
+                      subtaskSavingParentId === task.id
+                      ? 'Creating...'
+                      : '+ Create subtask'
+                      }}
                     </button>
                   </div>
                 </form>
@@ -686,7 +807,11 @@
                   Create your first task to get started.
                   }
                 </p>
-                <button type="button" class="primary-button" (click)="toggleCreateForm()">
+
+                <button
+                  type="button"
+                  class="primary-button"
+                  (click)="toggleCreateForm()">
                   + Create task
                 </button>
               </div>
@@ -699,8 +824,13 @@
       }
     </section>
 
+    <!-- COMMENTS -->
     @if (selectedCommentTask) {
-    <section class="panel comments-panel" id="task-comments" aria-live="polite">
+    <section
+      class="panel comments-panel"
+      id="task-comments"
+      aria-live="polite">
+
       <div class="panel-heading">
         <div>
           <p class="eyebrow">TASK DISCUSSION</p>
@@ -709,6 +839,7 @@
             Discussion for <strong>{{ selectedCommentTask.title }}</strong>
           </p>
         </div>
+
         <button
           type="button"
           class="icon-button"
@@ -720,6 +851,7 @@
       @if (commentMessage) {
       <div class="alert alert-success">{{ commentMessage }}</div>
       }
+
       @if (commentError) {
       <div class="alert alert-error">{{ commentError }}</div>
       }
@@ -733,11 +865,13 @@
           <div class="comment-avatar">
             {{ (comment.author || 'U').charAt(0).toUpperCase() }}
           </div>
+
           <div class="comment-body">
             <div class="comment-meta">
               <strong>{{ comment.author || 'Unknown' }}</strong>
               <time>{{ formatCommentDate(comment.createdAt) }}</time>
             </div>
+
             <p>{{ comment.content }}</p>
           </div>
         </article>
@@ -752,6 +886,7 @@
 
       <form class="comment-form" (ngSubmit)="addComment()">
         <label for="comment-content">Add a comment</label>
+
         <textarea
           id="comment-content"
           name="commentContent"
@@ -760,10 +895,12 @@
           maxlength="2000"
           placeholder="Share an update or ask a question..."
           required></textarea>
+
         <div class="form-actions">
-          <span class="form-hint">
-            {{ commentDraft.length }}/2000 characters · Posting as Roopesh
-          </span>
+            <span class="form-hint">
+              {{ commentDraft.length }}/2000 characters · Posting as Roopesh
+            </span>
+
           <button
             type="submit"
             class="primary-button"
@@ -775,15 +912,115 @@
     </section>
     }
 
+    <!-- PROJECTS AND CREATE PROJECT FORM -->
     <section class="panel projects-panel" id="projects">
       <div class="panel-heading">
         <div>
           <h2>Your projects</h2>
-          <p class="section-description">Projects retrieved from your backend.</p>
+          <p class="section-description">
+            Create and manage projects in your workspace.
+          </p>
         </div>
-        <span class="task-count">{{ projects.length }} projects</span>
+
+        <div class="ai-form-actions">
+          <span class="task-count">{{ projects.length }} projects</span>
+
+          <button
+            type="button"
+            class="primary-button"
+            (click)="toggleProjectForm()">
+            {{ showProjectForm ? 'Cancel' : '+ Create project' }}
+          </button>
+        </div>
       </div>
 
+      @if (projectMessage) {
+      <div class="alert alert-success">
+        {{ projectMessage }}
+      </div>
+      }
+
+      @if (projectError) {
+      <div class="alert alert-error">
+        {{ projectError }}
+      </div>
+      }
+
+      <!-- CREATE PROJECT FORM -->
+      @if (showProjectForm) {
+      <form class="task-form" (ngSubmit)="createProject()">
+        <div class="form-field">
+          <label for="project-name">Project name *</label>
+          <input
+            id="project-name"
+            name="projectName"
+            [(ngModel)]="newProject.name"
+            placeholder="Enter project name"
+            required />
+        </div>
+
+        <div class="form-field">
+          <label for="project-status">Status</label>
+          <select
+            id="project-status"
+            name="projectStatus"
+            [(ngModel)]="newProject.status">
+            <option value="PLANNING">Planning</option>
+            <option value="IN_PROGRESS">In Progress</option>
+            <option value="COMPLETED">Completed</option>
+          </select>
+        </div>
+
+        <div class="form-field form-field-wide">
+          <label for="project-description">Description</label>
+          <textarea
+            id="project-description"
+            name="projectDescription"
+            [(ngModel)]="newProject.description"
+            rows="3"
+            placeholder="Describe your project"></textarea>
+        </div>
+
+        <div class="form-field">
+          <label for="project-start-date">Start date *</label>
+          <input
+            id="project-start-date"
+            name="projectStartDate"
+            type="date"
+            [(ngModel)]="newProject.startDate"
+            required />
+        </div>
+
+        <div class="form-field">
+          <label for="project-deadline">Deadline *</label>
+          <input
+            id="project-deadline"
+            name="projectDeadline"
+            type="date"
+            [(ngModel)]="newProject.deadline"
+            required />
+        </div>
+
+        <div class="form-actions form-field-wide">
+          <button
+            type="button"
+            class="secondary-button"
+            (click)="toggleProjectForm()"
+            [disabled]="savingProject">
+            Cancel
+          </button>
+
+          <button
+            type="submit"
+            class="primary-button"
+            [disabled]="savingProject">
+            {{ savingProject ? 'Creating...' : 'Create project' }}
+          </button>
+        </div>
+      </form>
+      }
+
+      <!-- PROJECT LIST -->
       @if (projects.length === 0) {
       <div class="empty-state">
         <p>No projects are available yet.</p>
@@ -794,20 +1031,29 @@
         <article class="project-card">
           <div class="project-card-top">
             <div class="project-icon">P</div>
-            <span class="project-status">{{ project.status.replace('_', ' ') }}</span>
+            <span class="project-status">
+                  {{ project.status.replace('_', ' ') }}
+                </span>
           </div>
+
           <h3>{{ project.name }}</h3>
-          <p>{{ project.description || 'No project description provided.' }}</p>
+
+          <p>
+            {{ project.description || 'No project description provided.' }}
+          </p>
+
           <div class="project-meta">
             <div>
               <span class="meta-label">Start date</span>
               <strong>{{ project.startDate || '—' }}</strong>
             </div>
+
             <div>
               <span class="meta-label">Deadline</span>
               <strong>{{ project.deadline || '—' }}</strong>
             </div>
           </div>
+
           <div class="project-card-footer">
             <span class="project-member-avatar">R</span>
             <span>Roopesh</span>
@@ -819,6 +1065,7 @@
       }
     </section>
 
+    <!-- FOOTER -->
     <footer class="page-footer">
       <span>Seconize Task Manager</span>
       <span>Workspace dashboard</span>

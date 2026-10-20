@@ -1,3 +1,4 @@
+
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
@@ -33,6 +34,14 @@ interface Project {
   status: string;
   startDate?: string;
   deadline?: string;
+}
+
+interface CreateProjectRequest {
+  name: string;
+  description: string;
+  status: string;
+  startDate: string;
+  deadline: string;
 }
 
 interface AiTaskSuggestion {
@@ -87,10 +96,29 @@ export class App implements OnInit {
   private readonly http = inject(HttpClient);
   private readonly cdr = inject(ChangeDetectorRef);
 
-  private readonly apiUrl = 'https://seconize-task-manager.onrender.com/api';
+  private readonly apiUrl =
+    'https://seconize-task-manager.onrender.com/api';
 
   tasks: Task[] = [];
   projects: Project[] = [];
+
+  // Create project form
+  showProjectForm = false;
+  savingProject = false;
+  projectMessage = '';
+  projectError = '';
+
+  newProject: CreateProjectRequest = this.emptyProject();
+
+  private emptyProject(): CreateProjectRequest {
+    return {
+      name: '',
+      description: '',
+      status: 'PLANNING',
+      startDate: '',
+      deadline: ''
+    };
+  }
 
   // AI task generator
   aiProjectDescription = '';
@@ -207,6 +235,80 @@ export class App implements OnInit {
       });
   }
 
+  // Create project
+  toggleProjectForm(): void {
+    if (this.savingProject) {
+      return;
+    }
+
+    this.projectError = '';
+    this.projectMessage = '';
+    this.showProjectForm = !this.showProjectForm;
+  }
+
+  createProject(): void {
+    this.projectError = '';
+    this.projectMessage = '';
+
+    if (this.savingProject) {
+      return;
+    }
+
+    if (!this.newProject.name.trim()) {
+      this.projectError = 'Please enter a project name.';
+      return;
+    }
+
+    if (!this.newProject.startDate || !this.newProject.deadline) {
+      this.projectError = 'Please select both project dates.';
+      return;
+    }
+
+    if (this.newProject.deadline < this.newProject.startDate) {
+      this.projectError = 'Deadline cannot be before the start date.';
+      return;
+    }
+
+    const request: CreateProjectRequest = {
+      name: this.newProject.name.trim(),
+      description: this.newProject.description.trim(),
+      status: this.newProject.status,
+      startDate: this.newProject.startDate,
+      deadline: this.newProject.deadline
+    };
+
+    this.savingProject = true;
+
+    this.http
+      .post<Project>(`${this.apiUrl}/projects`, request)
+      .pipe(
+        finalize(() => {
+          this.savingProject = false;
+          this.cdr.detectChanges();
+        })
+      )
+      .subscribe({
+        next: (project) => {
+          this.projectMessage =
+            `Project "${project.name}" created successfully.`;
+          this.projectError = '';
+          this.newProject = this.emptyProject();
+          this.showProjectForm = false;
+          this.loadDashboard();
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error('Create project API error:', err);
+          this.projectError =
+            err.error?.message ??
+            err.error?.detail ??
+            'Could not create the project. Check the backend API.';
+          this.cdr.detectChanges();
+        }
+      });
+  }
+
+  // Create task
   toggleCreateForm(): void {
     this.taskError = '';
     this.taskMessage = '';
@@ -733,12 +835,9 @@ export class App implements OnInit {
     { status: 'DONE', label: 'Done' }
   ];
 
-  // Return the tasks that belong in a Kanban column.
   tasksForStatus(status: string): Task[] {
     return this.tasks.filter(task => task.status === status);
   }
-
-  // Update a task's status when it is moved to another Kanban column.
 
   moveTask(task: Task, newStatus: string): void {
     if (task.status === newStatus) {
@@ -783,7 +882,6 @@ export class App implements OnInit {
         }
       });
   }
-
 
   statusLabel(status: string): string {
     switch (status) {
@@ -866,7 +964,6 @@ export class App implements OnInit {
     this.aiMessage = '';
   }
 
-
   saveAiSuggestions(): void {
     this.aiError = '';
     this.aiMessage = '';
@@ -937,7 +1034,6 @@ export class App implements OnInit {
 
     return `${year}-${month}-${day}`;
   }
-
 
   get completedCount(): number {
     return this.tasks.filter(task => task.status === 'DONE').length;
