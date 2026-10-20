@@ -87,7 +87,7 @@ export class App implements OnInit {
   private readonly http = inject(HttpClient);
   private readonly cdr = inject(ChangeDetectorRef);
 
-  private readonly apiUrl = 'http://localhost:8080/api';
+  private readonly apiUrl = 'https://seconize-task-manager.onrender.com/api';
 
   tasks: Task[] = [];
   projects: Project[] = [];
