@@ -62,7 +62,7 @@ A project can contain many tasks. A task may be associated with a project.
 - Avoid real credentials or personal data in sample data and screenshots.
 
 ## Deployment references
-- Frontend: https://seconize-task-manager.vercel.app (verify the URL before submission)
+- Frontend: https://seconize-task-manager.vercel.app 
 - Backend base URL: https://seconize-task-manager.onrender.com/api
 - Repository: https://github.com/MatadaRoopesh/seconize-task-manager
 
