@@ -1,4 +1,3 @@
-
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
@@ -37,6 +36,14 @@ interface Project {
 }
 
 interface CreateProjectRequest {
+  name: string;
+  description: string;
+  status: string;
+  startDate: string;
+  deadline: string;
+}
+
+interface EditProjectForm {
   name: string;
   description: string;
   status: string;
@@ -109,6 +116,22 @@ export class App implements OnInit {
   projectError = '';
 
   newProject: CreateProjectRequest = this.emptyProject();
+
+  // Edit project form
+  editingProjectId: number | null = null;
+  savingProjectEdit = false;
+
+  editProject: EditProjectForm = this.emptyEditProject();
+
+  private emptyEditProject(): EditProjectForm {
+    return {
+      name: '',
+      description: '',
+      status: 'PLANNING',
+      startDate: '',
+      deadline: ''
+    };
+  }
 
   private emptyProject(): CreateProjectRequest {
     return {
@@ -306,7 +329,145 @@ export class App implements OnInit {
           this.cdr.detectChanges();
         }
       });
+
   }
+
+  // Open the edit project form
+  startEditProject(project: Project): void {
+    this.projectError = '';
+    this.projectMessage = '';
+
+    this.showProjectForm = false;
+    this.editingProjectId = project.id;
+
+    this.editProject = {
+      name: project.name ?? '',
+      description: project.description ?? '',
+      status: project.status ?? 'PLANNING',
+      startDate: project.startDate ?? '',
+      deadline: project.deadline ?? ''
+    };
+  }
+
+  // Cancel project editing
+  cancelEditProject(): void {
+    if (this.savingProjectEdit) {
+      return;
+    }
+
+    this.editingProjectId = null;
+    this.editProject = this.emptyEditProject();
+    this.projectError = '';
+  }
+
+  // Save project changes
+  updateProject(): void {
+    this.projectError = '';
+    this.projectMessage = '';
+
+    if (this.editingProjectId === null || this.savingProjectEdit) {
+      return;
+    }
+
+    if (!this.editProject.name.trim()) {
+      this.projectError = 'Please enter a project name.';
+      return;
+    }
+
+    if (!this.editProject.startDate || !this.editProject.deadline) {
+      this.projectError = 'Please select both project dates.';
+      return;
+    }
+
+    if (this.editProject.deadline < this.editProject.startDate) {
+      this.projectError = 'Deadline cannot be before the start date.';
+      return;
+    }
+
+    const projectId = this.editingProjectId;
+
+    const request: CreateProjectRequest = {
+      name: this.editProject.name.trim(),
+      description: this.editProject.description.trim(),
+      status: this.editProject.status,
+      startDate: this.editProject.startDate,
+      deadline: this.editProject.deadline
+    };
+
+    this.savingProjectEdit = true;
+
+    this.http
+      .put<Project>(`${this.apiUrl}/projects/${projectId}`, request)
+      .pipe(
+        finalize(() => {
+          this.savingProjectEdit = false;
+          this.cdr.detectChanges();
+        })
+      )
+      .subscribe({
+        next: (project) => {
+          this.projectMessage =
+            `Project "${project.name}" updated successfully.`;
+          this.editingProjectId = null;
+          this.editProject = this.emptyEditProject();
+          this.loadDashboard();
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error('Update project API error:', err);
+          this.projectError =
+            err.error?.message ??
+            err.error?.detail ??
+            'Could not update the project.';
+          this.cdr.detectChanges();
+        }
+      });
+  }
+
+  // Delete project after confirmation
+  deleteProject(project: Project): void {
+    this.projectError = '';
+    this.projectMessage = '';
+
+    if (
+      this.savingProject ||
+      this.savingProjectEdit ||
+      !confirm(`Are you sure you want to delete "${project.name}"?`)
+    ) {
+      return;
+    }
+
+    this.http
+      .delete(`${this.apiUrl}/projects/${project.id}`)
+      .pipe(
+        finalize(() => {
+          this.cdr.detectChanges();
+        })
+      )
+      .subscribe({
+        next: () => {
+          this.projectMessage =
+            `Project "${project.name}" deleted successfully.`;
+
+          if (this.editingProjectId === project.id) {
+            this.editingProjectId = null;
+            this.editProject = this.emptyEditProject();
+          }
+
+          this.loadDashboard();
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error('Delete project API error:', err);
+          this.projectError =
+            err.error?.message ??
+            err.error?.detail ??
+            'Could not delete the project. It may still contain tasks.';
+          this.cdr.detectChanges();
+        }
+      });
+  }
+
 
   // Create task
   toggleCreateForm(): void {

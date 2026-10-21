@@ -1029,6 +1029,79 @@
       <div class="projects-grid">
         @for (project of projects; track project.id) {
         <article class="project-card">
+
+
+          @if (editingProjectId === project.id) {
+          <form class="task-form" (ngSubmit)="updateProject()">
+            <div class="form-field">
+              <label [for]="'edit-project-name-' + project.id">Project name *</label>
+              <input
+                [id]="'edit-project-name-' + project.id"
+                name="editProjectName"
+                [(ngModel)]="editProject.name"
+                required />
+            </div>
+
+            <div class="form-field">
+              <label [for]="'edit-project-status-' + project.id">Status</label>
+              <select
+                [id]="'edit-project-status-' + project.id"
+                name="editProjectStatus"
+                [(ngModel)]="editProject.status">
+                <option value="PLANNING">Planning</option>
+                <option value="IN_PROGRESS">In Progress</option>
+                <option value="COMPLETED">Completed</option>
+              </select>
+            </div>
+
+            <div class="form-field form-field-wide">
+              <label [for]="'edit-project-description-' + project.id">Description</label>
+              <textarea
+                [id]="'edit-project-description-' + project.id"
+                name="editProjectDescription"
+                [(ngModel)]="editProject.description"
+                rows="3"></textarea>
+            </div>
+
+            <div class="form-field">
+              <label [for]="'edit-project-start-' + project.id">Start date *</label>
+              <input
+                [id]="'edit-project-start-' + project.id"
+                name="editProjectStartDate"
+                type="date"
+                [(ngModel)]="editProject.startDate"
+                required />
+            </div>
+
+            <div class="form-field">
+              <label [for]="'edit-project-deadline-' + project.id">Deadline *</label>
+              <input
+                [id]="'edit-project-deadline-' + project.id"
+                name="editProjectDeadline"
+                type="date"
+                [(ngModel)]="editProject.deadline"
+                required />
+            </div>
+
+            <div class="form-actions form-field-wide">
+              <button
+                type="button"
+                class="secondary-button"
+                (click)="cancelEditProject()"
+                [disabled]="savingProjectEdit">
+                Cancel
+              </button>
+
+              <button
+                type="submit"
+                class="primary-button"
+                [disabled]="savingProjectEdit">
+                {{ savingProjectEdit ? 'Saving...' : 'Save changes' }}
+              </button>
+            </div>
+          </form>
+          } @else {
+
           <div class="project-card-top">
             <div class="project-icon">P</div>
             <span class="project-status">
@@ -1059,6 +1132,25 @@
             <span>Roopesh</span>
             <span class="project-footer-label">Project member</span>
           </div>
+
+          <div class="form-actions">
+            <button
+              type="button"
+              class="secondary-button"
+              (click)="startEditProject(project)"
+              [disabled]="savingProjectEdit || savingProject">
+              Edit
+            </button>
+
+            <button
+              type="button"
+              class="secondary-button"
+              (click)="deleteProject(project)"
+              [disabled]="savingProjectEdit || savingProject">
+              Delete
+            </button>
+          </div>
+          }
         </article>
         }
       </div>
