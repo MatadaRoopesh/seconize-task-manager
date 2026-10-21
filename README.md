@@ -5,7 +5,7 @@ A full-stack proof of concept developed for the Seconize Full Stack Developer In
 
 ## Live Application
 
-- **Frontend:** https://seconize-task-manager.vercel.app
+- **Frontend:** https://seconize-task-manager-cnbcre0ok-protech13.vercel.app/
 - **Backend API:** https://seconize-task-manager.onrender.com/api
 - **GitHub Repository:** https://github.com/MatadaRoopesh/seconize-task-manager
 
