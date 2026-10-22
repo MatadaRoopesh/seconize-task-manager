@@ -338,7 +338,6 @@
         <p>Currently being worked on</p>
       </article>
     </section>
-
     <!-- KANBAN BOARD -->
     <section class="panel kanban-panel" id="kanban-board">
       <div class="panel-heading">
@@ -419,7 +418,7 @@
         <div>
           <h2>Task overview</h2>
           <p class="section-description">
-            Manage tasks, subtasks and discussions.
+            Manage tasks, subtasks, discussions and activity history.
           </p>
         </div>
 
@@ -514,7 +513,11 @@
                   type="button"
                   class="small-button subtask-btn"
                   (click)="toggleSubtasks(task)">
-                  {{ expandedSubtaskParentId === task.id ? 'Hide subtasks' : 'Subtasks' }}
+                  {{
+                  expandedSubtaskParentId === task.id
+                  ? 'Hide subtasks'
+                  : 'Subtasks'
+                  }}
                   ({{ subtasksByParent[task.id]?.length ?? '…' }})
                 </button>
                 }
@@ -522,19 +525,35 @@
                 <button
                   type="button"
                   class="small-button comments-btn"
-                  (click)="openComments(task)">Comments</button>
+                  (click)="openComments(task)">
+                  Comments
+                </button>
+
+                <!-- NEW: ACTIVITY HISTORY BUTTON -->
+                <button
+                  type="button"
+                  class="small-button activity-btn"
+                  (click)="openActivity(task)">
+                  Activity
+                </button>
 
                 <button
                   type="button"
                   class="small-button edit-btn"
-                  (click)="startEdit(task)">Edit</button>
+                  (click)="startEdit(task)">
+                  Edit
+                </button>
 
                 <button
                   type="button"
                   class="small-button delete-btn"
                   [disabled]="deletingTaskId === task.id"
                   (click)="deleteTask(task)">
-                  {{ deletingTaskId === task.id ? 'Deleting...' : 'Delete' }}
+                  {{
+                  deletingTaskId === task.id
+                  ? 'Deleting...'
+                  : 'Delete'
+                  }}
                 </button>
               </div>
             </td>
@@ -549,7 +568,9 @@
 
                 <div class="task-form">
                   <div class="form-field">
-                    <label [for]="'edit-title-' + task.id">Title *</label>
+                    <label [for]="'edit-title-' + task.id">
+                      Title *
+                    </label>
                     <input
                       [id]="'edit-title-' + task.id"
                       name="editTitle"
@@ -558,7 +579,9 @@
                   </div>
 
                   <div class="form-field">
-                    <label [for]="'edit-assignee-' + task.id">Assignee</label>
+                    <label [for]="'edit-assignee-' + task.id">
+                      Assignee
+                    </label>
                     <input
                       [id]="'edit-assignee-' + task.id"
                       name="editAssignee"
@@ -566,7 +589,9 @@
                   </div>
 
                   <div class="form-field form-field-wide">
-                    <label [for]="'edit-description-' + task.id">Description</label>
+                    <label [for]="'edit-description-' + task.id">
+                      Description
+                    </label>
                     <textarea
                       [id]="'edit-description-' + task.id"
                       name="editDescription"
@@ -575,7 +600,9 @@
                   </div>
 
                   <div class="form-field">
-                    <label [for]="'edit-deadline-' + task.id">Deadline</label>
+                    <label [for]="'edit-deadline-' + task.id">
+                      Deadline
+                    </label>
                     <input
                       [id]="'edit-deadline-' + task.id"
                       name="editDeadline"
@@ -584,7 +611,9 @@
                   </div>
 
                   <div class="form-field">
-                    <label [for]="'edit-priority-' + task.id">Priority</label>
+                    <label [for]="'edit-priority-' + task.id">
+                      Priority
+                    </label>
                     <select
                       [id]="'edit-priority-' + task.id"
                       name="editPriority"
@@ -597,7 +626,9 @@
                   </div>
 
                   <div class="form-field">
-                    <label [for]="'edit-status-' + task.id">Status</label>
+                    <label [for]="'edit-status-' + task.id">
+                      Status
+                    </label>
                     <select
                       [id]="'edit-status-' + task.id"
                       name="editStatus"
@@ -621,7 +652,9 @@
                     type="submit"
                     class="primary-button"
                     [disabled]="savingTask">
-                    {{ savingTask ? 'Saving...' : 'Save changes' }}
+                    {{
+                    savingTask ? 'Saving...' : 'Save changes'
+                    }}
                   </button>
                 </div>
               </form>
@@ -630,7 +663,10 @@
           }
 
           <!-- SUBTASKS -->
-          @if (expandedSubtaskParentId === task.id && !isSubtask(task)) {
+          @if (
+          expandedSubtaskParentId === task.id &&
+          !isSubtask(task)
+          ) {
           <tr class="subtask-expanded-row">
             <td colspan="6">
               <section
@@ -647,20 +683,27 @@
                   </div>
 
                   <span class="task-count">
-                            {{ subtasksByParent[task.id]?.length ?? 0 }} items
+                            {{ subtasksByParent[task.id]?.length ?? 0 }}
+                            items
                           </span>
                 </div>
 
                 @if (subtaskMessage) {
-                <div class="alert alert-success">{{ subtaskMessage }}</div>
+                <div class="alert alert-success">
+                  {{ subtaskMessage }}
+                </div>
                 }
 
                 @if (subtaskError) {
-                <div class="alert alert-error">{{ subtaskError }}</div>
+                <div class="alert alert-error">
+                  {{ subtaskError }}
+                </div>
                 }
 
                 @if (subtaskLoadingParentId === task.id) {
-                <div class="loading-state">Loading subtasks...</div>
+                <div class="loading-state">
+                  Loading subtasks...
+                </div>
                 } @else {
                 <div class="subtask-list">
                   @for (
@@ -671,10 +714,14 @@
                     <div class="subtask-item-copy">
                       <strong>{{ subtask.title }}</strong>
                       <span>
-                                    {{ subtask.description || 'No description provided' }}
+                                    {{
+                                      subtask.description ||
+                                      'No description provided'
+                                    }}
                                   </span>
                       <small>
-                        #{{ subtask.id }} · {{ subtask.assignee || 'Unassigned' }}
+                        #{{ subtask.id }} ·
+                        {{ subtask.assignee || 'Unassigned' }}
                         · Due {{ subtask.deadline || '—' }}
                       </small>
                     </div>
@@ -702,7 +749,17 @@
                       <button
                         type="button"
                         class="small-button comments-btn"
-                        (click)="openComments(subtask)">Comments</button>
+                        (click)="openComments(subtask)">
+                        Comments
+                      </button>
+
+                      <!-- NEW: ACTIVITY HISTORY FOR SUBTASK -->
+                      <button
+                        type="button"
+                        class="small-button activity-btn"
+                        (click)="openActivity(subtask)">
+                        Activity
+                      </button>
                     </div>
                   </article>
                   } @empty {
@@ -722,7 +779,9 @@
 
                   <div class="task-form">
                     <div class="form-field">
-                      <label [for]="'subtask-title-' + task.id">Title *</label>
+                      <label [for]="'subtask-title-' + task.id">
+                        Title *
+                      </label>
                       <input
                         [id]="'subtask-title-' + task.id"
                         [name]="'subtask-title-' + task.id"
@@ -732,7 +791,9 @@
                     </div>
 
                     <div class="form-field">
-                      <label [for]="'subtask-assignee-' + task.id">Assignee</label>
+                      <label [for]="'subtask-assignee-' + task.id">
+                        Assignee
+                      </label>
                       <input
                         [id]="'subtask-assignee-' + task.id"
                         [name]="'subtask-assignee-' + task.id"
@@ -741,7 +802,9 @@
                     </div>
 
                     <div class="form-field form-field-wide">
-                      <label [for]="'subtask-description-' + task.id">Description</label>
+                      <label [for]="'subtask-description-' + task.id">
+                        Description
+                      </label>
                       <textarea
                         [id]="'subtask-description-' + task.id"
                         [name]="'subtask-description-' + task.id"
@@ -751,7 +814,9 @@
                     </div>
 
                     <div class="form-field">
-                      <label [for]="'subtask-deadline-' + task.id">Deadline *</label>
+                      <label [for]="'subtask-deadline-' + task.id">
+                        Deadline *
+                      </label>
                       <input
                         [id]="'subtask-deadline-' + task.id"
                         [name]="'subtask-deadline-' + task.id"
@@ -761,7 +826,9 @@
                     </div>
 
                     <div class="form-field">
-                      <label [for]="'subtask-priority-' + task.id">Priority</label>
+                      <label [for]="'subtask-priority-' + task.id">
+                        Priority
+                      </label>
                       <select
                         [id]="'subtask-priority-' + task.id"
                         [name]="'subtask-priority-' + task.id"
@@ -823,8 +890,7 @@
       </div>
       }
     </section>
-
-    <!-- COMMENTS -->
+    <!-- COMMENTS PANEL -->
     @if (selectedCommentTask) {
     <section
       class="panel comments-panel"
@@ -836,7 +902,8 @@
           <p class="eyebrow">TASK DISCUSSION</p>
           <h2>Comments</h2>
           <p class="section-description">
-            Discussion for <strong>{{ selectedCommentTask.title }}</strong>
+            Discussion for
+            <strong>{{ selectedCommentTask.title }}</strong>
           </p>
         </div>
 
@@ -909,6 +976,132 @@
           </button>
         </div>
       </form>
+    </section>
+    }
+
+    <!-- NEW: TASK ACTIVITY HISTORY -->
+    @if (selectedActivityTask) {
+    <section
+      class="panel activity-panel"
+      id="task-activity"
+      aria-live="polite">
+
+      <div class="panel-heading">
+        <div>
+          <p class="eyebrow">TASK AUDIT TRAIL</p>
+          <h2>Activity History</h2>
+          <p class="section-description">
+            Recorded changes for
+            <strong>{{ selectedActivityTask.title }}</strong>
+            · Task #{{ selectedActivityTask.id }}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="icon-button"
+          (click)="closeActivity()"
+          aria-label="Close activity history">×</button>
+      </div>
+
+      @if (activityLoading) {
+      <div class="loading-state" role="status">
+        Loading activity history...
+      </div>
+      } @else if (activityError) {
+      <div class="alert alert-error" role="alert">
+        {{ activityError }}
+
+        <button
+          type="button"
+          class="secondary-button"
+          (click)="openActivity(selectedActivityTask!)">
+          Retry
+        </button>
+      </div>
+      } @else {
+      <div class="activity-list">
+        @for (activity of activities; track activity.id) {
+        <article class="activity-item">
+          <div class="activity-marker" aria-hidden="true">
+                  <span>
+                    {{ activity.action === 'STATUS_CHANGED' ? '↻' : '•' }}
+                  </span>
+          </div>
+
+          <div class="activity-content">
+            <div class="activity-title-row">
+              <strong>
+                @if (activity.action === 'STATUS_CHANGED') {
+                Task status changed
+                } @else {
+                {{ activity.action.replace('_', ' ') }}
+                }
+              </strong>
+
+              <time>
+                {{ formatActivityDate(activity.createdAt) }}
+              </time>
+            </div>
+
+            @if (activity.action === 'STATUS_CHANGED') {
+            <p class="activity-description">
+              Status changed from
+
+              <span
+                class="status-badge"
+                [class.status-todo]="activity.oldStatus === 'TODO'"
+                [class.status-progress]="activity.oldStatus === 'IN_PROGRESS'"
+                [class.status-done]="activity.oldStatus === 'DONE'">
+                        {{ statusLabel(activity.oldStatus || 'UNKNOWN') }}
+                      </span>
+
+              to
+
+              <span
+                class="status-badge"
+                [class.status-todo]="activity.newStatus === 'TODO'"
+                [class.status-progress]="activity.newStatus === 'IN_PROGRESS'"
+                [class.status-done]="activity.newStatus === 'DONE'">
+                        {{ statusLabel(activity.newStatus || 'UNKNOWN') }}
+                      </span>
+            </p>
+            } @else {
+            <p class="activity-description">
+              {{ activity.action.replace('_', ' ') }}
+            </p>
+            }
+
+            <small class="activity-task-reference">
+              Task #{{ activity.taskId }}
+            </small>
+          </div>
+        </article>
+        } @empty {
+        <div class="activity-empty">
+          <div class="activity-empty-icon" aria-hidden="true">◷</div>
+          <strong>No activity recorded yet</strong>
+          <p>
+            Changes recorded by the backend will appear here.
+          </p>
+        </div>
+        }
+      </div>
+      }
+
+      <div class="activity-footer">
+          <span class="form-hint">
+            Activity is displayed from the task history API.
+          </span>
+
+        <button
+          type="button"
+          class="secondary-button"
+          (click)="openActivity(selectedActivityTask!)"
+          [disabled]="activityLoading">
+          {{ activityLoading ? 'Refreshing...' : 'Refresh history' }}
+        </button>
+      </div>
     </section>
     }
 
@@ -1029,12 +1222,12 @@
       <div class="projects-grid">
         @for (project of projects; track project.id) {
         <article class="project-card">
-
-
           @if (editingProjectId === project.id) {
           <form class="task-form" (ngSubmit)="updateProject()">
             <div class="form-field">
-              <label [for]="'edit-project-name-' + project.id">Project name *</label>
+              <label [for]="'edit-project-name-' + project.id">
+                Project name *
+              </label>
               <input
                 [id]="'edit-project-name-' + project.id"
                 name="editProjectName"
@@ -1043,7 +1236,9 @@
             </div>
 
             <div class="form-field">
-              <label [for]="'edit-project-status-' + project.id">Status</label>
+              <label [for]="'edit-project-status-' + project.id">
+                Status
+              </label>
               <select
                 [id]="'edit-project-status-' + project.id"
                 name="editProjectStatus"
@@ -1055,7 +1250,9 @@
             </div>
 
             <div class="form-field form-field-wide">
-              <label [for]="'edit-project-description-' + project.id">Description</label>
+              <label [for]="'edit-project-description-' + project.id">
+                Description
+              </label>
               <textarea
                 [id]="'edit-project-description-' + project.id"
                 name="editProjectDescription"
@@ -1064,7 +1261,9 @@
             </div>
 
             <div class="form-field">
-              <label [for]="'edit-project-start-' + project.id">Start date *</label>
+              <label [for]="'edit-project-start-' + project.id">
+                Start date *
+              </label>
               <input
                 [id]="'edit-project-start-' + project.id"
                 name="editProjectStartDate"
@@ -1074,7 +1273,9 @@
             </div>
 
             <div class="form-field">
-              <label [for]="'edit-project-deadline-' + project.id">Deadline *</label>
+              <label [for]="'edit-project-deadline-' + project.id">
+                Deadline *
+              </label>
               <input
                 [id]="'edit-project-deadline-' + project.id"
                 name="editProjectDeadline"
@@ -1096,23 +1297,27 @@
                 type="submit"
                 class="primary-button"
                 [disabled]="savingProjectEdit">
-                {{ savingProjectEdit ? 'Saving...' : 'Save changes' }}
+                {{
+                savingProjectEdit ? 'Saving...' : 'Save changes'
+                }}
               </button>
             </div>
           </form>
           } @else {
-
           <div class="project-card-top">
             <div class="project-icon">P</div>
             <span class="project-status">
-                  {{ project.status.replace('_', ' ') }}
-                </span>
+                    {{ project.status.replace('_', ' ') }}
+                  </span>
           </div>
 
           <h3>{{ project.name }}</h3>
 
           <p>
-            {{ project.description || 'No project description provided.' }}
+            {{
+            project.description ||
+            'No project description provided.'
+            }}
           </p>
 
           <div class="project-meta">

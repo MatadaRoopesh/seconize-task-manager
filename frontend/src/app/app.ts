@@ -26,6 +26,17 @@ interface TaskComment {
   createdAt: string;
 }
 
+
+interface TaskActivity {
+  id: number;
+  taskId: number;
+  action: string;
+  oldStatus: string | null;
+  newStatus: string | null;
+  createdAt: string;
+}
+
+
 interface Project {
   id: number;
   name: string;
@@ -166,6 +177,12 @@ export class App implements OnInit {
 
   selectedCommentTask: Task | null = null;
   comments: TaskComment[] = [];
+
+  selectedActivityTask: Task | null = null;
+  activities: TaskActivity[] = [];
+  activityLoading = false;
+  activityError = '';
+
   commentDraft = '';
   commentLoading = false;
   commentSaving = false;
@@ -869,6 +886,64 @@ export class App implements OnInit {
       });
   }
 
+  // Open a task's activity history
+  openActivity(task: Task): void {
+    this.selectedActivityTask = task;
+    this.activities = [];
+    this.activityError = '';
+    this.activityLoading = true;
+    this.cdr.detectChanges();
+
+    window.setTimeout(() => {
+      document.getElementById('task-activity')?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }, 100);
+
+    this.http
+      .get<TaskActivity[]>(`${this.apiUrl}/tasks/${task.id}/activity`)
+      .pipe(
+        finalize(() => {
+          this.activityLoading = false;
+          this.cdr.detectChanges();
+        })
+      )
+      .subscribe({
+        next: (activities) => {
+          this.activities = activities ?? [];
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error('Load activity history API error:', err);
+          this.activityError =
+            err.error?.message ??
+            err.error?.detail ??
+            'Could not load activity history. Check that the backend activity API is deployed.';
+          this.cdr.detectChanges();
+        }
+      });
+  }
+
+  // Close the activity history panel
+  closeActivity(): void {
+    this.selectedActivityTask = null;
+    this.activities = [];
+    this.activityError = '';
+  }
+
+  // Format activity timestamps for display
+  formatActivityDate(value: string): string {
+    if (!value) {
+      return '';
+    }
+
+    const date = new Date(value);
+    return Number.isNaN(date.getTime())
+      ? value
+      : date.toLocaleString();
+  }
+
   openComments(task: Task): void {
     this.selectedCommentTask = task;
     this.comments = [];
@@ -1210,3 +1285,4 @@ export class App implements OnInit {
     ).length;
   }
 }
+
