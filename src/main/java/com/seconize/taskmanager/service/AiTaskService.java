@@ -212,7 +212,7 @@ public class AiTaskService {
             try {
                 return restClient.post()
                         .uri(
-                                "/v1beta/models/gemini-3.5-flash:generateContent"
+                                "/v1beta/models/gemini-3.8-flash:generateContent"
                         )
                         .header("x-goog-api-key", apiKey)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -223,8 +223,7 @@ public class AiTaskService {
             } catch (RestClientResponseException exception) {
                 HttpStatusCode status = exception.getStatusCode();
 
-                boolean retryable =
-                        status.value() == 429 || status.value() == 503;
+                boolean retryable = status.value() == 503;
 
                 if (!retryable || attempt == maxAttempts) {
                     throw exception;
